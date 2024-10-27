@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cricket Quiz</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Bungee&display=swap');
+        body {
+            font-family: 'Bungee', sans-serif;
+            background: url('—Pngtree—icc cricket world match background_13431639.png') no-repeat center center fixed;
+            background-size: cover;
+            color: #333;
+            text-align: center;
+        }
+        h1 {
+            font-size: 2.3rem;
+            color: #ffc107;
+            margin: 15px 0;
+            text-shadow: 3px 3px #000;
+        }
+        #quiz-container {
+            width: 90%;
+            max-width: 600px;
+            margin: auto;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 20px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+            padding: 20px;
+            animation: fadeIn 1.2s;
+        }
+        .question {
+            font-size: 1.5rem;
+            margin: 20px 0;
+            color: #ffeb3b;
+        }
+        .option {
+            background-color: #3c3c3c;
+            color: white;
+            padding: 15px;
+            margin: 11px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: transform 0.4s, background-color 0.4s;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+        }
+        .option:hover {
+            background-color: #1de9b6;
+            transform: scale(1.05) rotate(1deg);
+        }
+        .correct {
+            background-color: #66bb6a;
+            position: relative;
+        }
+        .incorrect {
+            background-color: #e57373;
+            position: relative;
+        }
+        .correct:after, .incorrect:after {
+            content: attr(data-feedback);
+            font-size: 1.2rem;
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        #next-btn {
+            display: none;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #ff6f00;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.4s;
+        }
+        #next-btn:hover {
+            background-color: #ef6c00;
+        }
+        #progress-container {
+            width: 100%;
+            background-color: #f1f1f1;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+            height: 10px;
+            box-shadow: inset 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+        #progress-fill {
+            height: 10px;
+            background-color: #29b6f6;
+            width: 0;
+            transition: width 0.5s;
+        }
+        #timer {
+            font-size: 1.4rem;
+            color: #ffc107;
+            margin: 20px 0;
+            position: relative;
+            font-weight: bold;
+        }
+        #timer::before {
+            content: "⏳ ";
+            font-size: 1.4rem;
+            color: #ff6b6b;
+        }
+        #question-count {
+            font-size: 1.2rem;
+            color: #ffc107;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @media (max-width: 600px) {
+    body {
+        font-size: 1rem; 
+    }
+    h1 {
+        font-size: 1.8rem; 
+    }
+    #quiz-container {
+        padding: 15px; 
+    }
+    .question {
+        font-size: 1.2rem; 
+    }
+    .option {
+        padding: 12px; 
+        font-size: 1rem; 
+    }
+    #timer, #question-count {
+        font-size: 1rem; 
+    }
+    #next-btn {
+        padding: 8px 16px; 
+        font-size: 1rem; 
+    }
+    #progress-container {
+        height: 8px; 
+    }
+    #progress-fill {
+        height: 8px; 
+    }
+}
+
+    </style>
+</head>
+<body>
+
+    <h1>Cricket Quiz</h1>
+    <div id="quiz-container">
+        <div id="timer">Time Left: <span id="time-left">10</span> seconds</div>
+        <div id="question-count">Questions Left: <span id="questions-left">0</span></div>
+        <div id="progress-container">
+            <div id="progress-fill"></div>
+        </div>
+        <div class="question"></div>
+        <div id="options-container"></div>
+        <button id="next-btn" onclick="nextQuestion()">Next Question</button>
+    </div>
+
+    <script>
+        const quizQuestions = [
+           { question: "Who scored the most runs in Test cricket?", options: ["Sachin Tendulkar", "Brian Lara", "Ricky Ponting", "Jacques Kallis"], answer: "Sachin Tendulkar" }, { question: "Which country won the 2019 ICC Cricket World Cup?", options: ["India", "England", "Australia", "New Zealand"], answer: "England" }, { question: "What is the maximum number of overs in a One Day International (ODI)?", options: ["40", "45", "50", "60"], answer: "50" }, { question: "Which player is known as the 'Master Blaster'?", options: ["MS Dhoni", "Sachin Tendulkar", "Virat Kohli", "Brian Lara"], answer: "Sachin Tendulkar" }, { question: "What does 'LBW' stand for?", options: ["Leg Before Wicket", "Last Ball Wicket", "Lower Body Wicket", "Leg Bouncer Wicket"], answer: "Leg Before Wicket" }, { question: "Who was the first captain of the Indian cricket team?", options: ["Kapil Dev", "Sourav Ganguly", "M. S. Dhoni", "C. K. Nayudu"], answer: "C. K. Nayudu" }, { question: "Which cricketer is known as 'The Wall'?", options: ["Rahul Dravid", "Sachin Tendulkar", "Virat Kohli", "Brian Lara"], answer: "Rahul Dravid" }, { question: "How many players are there in a cricket team?", options: ["10", "11", "12", "15"], answer: "11" }, { question: "What is the term for a ball that is bowled without bouncing?", options: ["No-ball", "Full toss", "Wide", "Yorker"], answer: "Full toss" }, { question: "Who is the fastest century maker in ODIs?", options: ["AB de Villiers", "Chris Gayle", "Virat Kohli", "Rohit Sharma"], answer: "AB de Villiers" }, { question: "In which year was the first T20 World Cup held?", options: ["2005", "2007", "2009", "2010"], answer: "2007" }, { question: "Who is the highest wicket-taker in ODI cricket?", options: ["Muttiah Muralitharan", "Wasim Akram", "Shane Warne", "Glenn McGrath"], answer: "Muttiah Muralitharan" }, { question: "Who captained India to victory in the 1983 World Cup?", options: ["Kapil Dev", "Sourav Ganguly", "MS Dhoni", "Rahul Dravid"], answer: "Kapil Dev" }, { question: "Which team won the ICC Champions Trophy in 2017?", options: ["India", "Pakistan", "Australia", "England"], answer: "Pakistan" }, { question: "What is a 'no-ball'?", options: ["An illegal delivery", "A ball that goes out of bounds", "A boundary", "A missed catch"], answer: "An illegal delivery" }, { question: "Who has the highest individual score in an ODI match?", options: ["Rohit Sharma", "Sachin Tendulkar", "Virat Kohli", "AB de Villiers"], answer: "Rohit Sharma" }, { question: "Which country is known as the 'Home of Cricket'?", options: ["Australia", "India", "England", "South Africa"], answer: "England" }, { question: "Who has the record for the fastest century in ODIs?", options: ["AB de Villiers", "Chris Gayle", "MS Dhoni", "Virat Kohli"], answer: "AB de Villiers" }, { question: "What is the name of the trophy awarded for winning the Ashes series?", options: ["The Ashes", "The Cup", "The Shield", "The Trophy"], answer: "The Ashes" }, { question: "Which Indian cricketer is known as 'Captain Cool'?", options: ["Virat Kohli", "MS Dhoni", "Sourav Ganguly", "Rahul Dravid"], answer: "MS Dhoni" }, { question: "How many T20 World Cups have been held as of 2021?", options: ["5", "6", "7", "8"], answer: "7" }, { question: "Who is the fastest bowler in cricket history?", options: ["Shane Bond", "Brett Lee", "Wasim Akram", "Shoaib Akhtar"], answer: "Shoaib Akhtar" }, { question: "What is a 'googly'?", options: ["A type of delivery", "A form of batting", "A fielding position", "A cricket term"], answer: "A type of delivery" }, { question: "What is the primary governing body of cricket?", options: ["ICC", "BCCI", "ECB", "CA"], answer: "ICC" }, { question: "Who has the record for the most catches in Test cricket?", options: ["Rahul Dravid", "Mark Waugh", "Jack Russell", "Adam Gilchrist"], answer: "Rahul Dravid" }, { question: "What is the main color of the England cricket team jersey?", options: ["Blue", "Red", "White", "Green"], answer: "Red" }, { question: "Who is known as 'The Don' in cricket?", options: ["Sachin Tendulkar", "Shane Warne", "Don Bradman", "Brian Lara"], answer: "Don Bradman" }, { question: "What is the maximum number of overs in a T20 match?", options: ["10", "15", "20", "25"], answer: "20" }, { question: "Who was the first player to score a century in T20 Internationals?", options: ["Chris Gayle", "Suresh Raina", "Brendon McCullum", "Kevin Pietersen"], answer: "Chris Gayle" }, { question: "In which country was the 2015 Cricket World Cup held?", options: ["Australia and New Zealand", "India", "England", "South Africa"], answer: "Australia and New Zealand" }, { question: "Who has the record for the most sixes in international cricket?", options: ["Chris Gayle", "MS Dhoni", "Shahid Afridi", "Mark Waugh"], answer: "Chris Gayle" }, { question: "Who is the only player to score 100 international centuries?", options: ["Sachin Tendulkar", "Virat Kohli", "Ricky Ponting", "Brian Lara"], answer: "Sachin Tendulkar" }, { question: "What does 'ODI' stand for?", options: ["One Day International", "Over Day International", "One Day Innings", "Over Day Innings"], answer: "One Day International" }, { question: "Which team is known as 'Men in Blue'?", options: ["Australia", "India", "Pakistan", "South Africa"], answer: "India" }, { question: "What is the term for a delivery bowled with spin?", options: ["Fast bowl", "Spin bowl", "Slow ball", "Medium pace"], answer: "Spin bowl" }, { question: "How many runs is a boundary worth?", options: ["4", "6", "3", "2"], answer: "4" }, { question: "What is the highest score in a T20 match?", options: ["260", "278", "250", "200"], answer: "278" }, { question: "Who is the only bowler to take a hat-trick in World Cup history?", options: ["Wasim Akram", "Brett Lee", "Curtly Ambrose", "Shane Warne"], answer: "Wasim Akram" }, { question: "In cricket, what is 'Duck'?", options: ["Zero runs", "One run", "Two runs", "Three runs"], answer: "Zero runs" }, { question: "What does 'MOM' stand for?", options: ["Man of the Match", "Match of the Month", "Most Outstanding Match", "Most Optimistic Match"], answer: "Man of the Match" }, { question: "Who holds the record for the most runs in T20 Internationals?", options: ["Virat Kohli", "Chris Gayle", "MS Dhoni", "Rohit Sharma"], answer: "Virat Kohli" }, { question: "How many times has India won the Cricket World Cup?", options: ["1", "2", "3", "4"], answer: "2" }, { question: "What is the name of the trophy awarded for winning the ICC Cricket World Cup?", options: ["The World Cup Trophy", "The Golden Bat", "The Champions Trophy", "The Ashes"], answer: "The World Cup Trophy" }, { question: "Which player has scored the most runs in a single World Cup tournament?", options: ["Rohit Sharma", "Sachin Tendulkar", "Kumar Sangakkara", "AB de Villiers"], answer: "Rohit Sharma" }, { question: "What does 'BCCI' stand for?", options: ["Board of Control for Cricket in India", "Board of Cricket Control in India", "Cricket Control Board of India", "Cricket Board of Control in India"], answer: "Board of Control for Cricket in India" }, { question: "Who is known for the famous phrase 'Catches win matches'?", options: ["Sachin Tendulkar", "Mark Waugh", "MS Dhoni", "Virat Kohli"], answer: "Mark Waugh" }, { question: "How long is a standard cricket pitch?", options: ["20 yards", "22 yards", "24 yards", "26 yards"], answer: "22 yards" }, { question: "What is the name of the Australian cricket team?", options: ["The Wallabies", "The Kangaroos", "The Baggy Greens", "The Southern Stars"], answer: "The Baggy Greens" }, { question: "Which country has won the most ICC T20 World Cups?", options: ["India", "Pakistan", "West Indies", "Australia"], answer: "West Indies" }, { question: "What is the term for a delivery bowled with the seam upright?", options: ["Swing", "Seam", "Cut", "Inswing"], answer: "Seam" }, { question: "What is the role of a wicketkeeper?", options: ["Bowling", "Batting", "Fielding", "Keeping wickets"], answer: "Keeping wickets" }, { question: "Who is the first cricketer to score a century in all three formats?", options: ["Suresh Raina", "Virat Kohli", "AB de Villiers", "Rohit Sharma"], answer: "Suresh Raina" }, { question: "How many players can a team have on the field at one time?", options: ["10", "11", "12", "13"], answer: "11" }, { question: "What is the main purpose of a bowler?", options: ["To score runs", "To get wickets", "To field", "To keep the score"], answer: "To get wickets" }, { question: "What is a 'maiden over'?", options: ["An over with no runs", "An over with no balls", "An over with wickets", "An over with extras"], answer: "An over with no runs" }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let timeLeft = 15;
+        let timer;
+
+        function showQuestion() {
+            resetTimer();
+            updateProgressBar();
+            document.getElementById("questions-left").innerText = quizQuestions.length - currentQuestionIndex - 1;
+
+            const questionElement = document.querySelector(".question");
+            const optionsContainer = document.getElementById("options-container");
+            questionElement.innerText = quizQuestions[currentQuestionIndex].question;
+            optionsContainer.innerHTML = "";
+
+            quizQuestions[currentQuestionIndex].options.forEach(option => {
+                const optionElement = document.createElement("div");
+                optionElement.classList.add("option");
+                optionElement.innerText = option;
+                optionElement.onclick = () => selectOption(option);
+                optionsContainer.appendChild(optionElement);
+            });
+        }
+
+        function selectOption(selectedOption) {
+            const correctAnswer = quizQuestions[currentQuestionIndex].answer;
+            const options = document.querySelectorAll(".option");
+
+            if (selectedOption === correctAnswer) {
+                score++;
+                options.forEach(option => {
+                    if (option.innerText === correctAnswer) {
+                        option.classList.add("correct");
+                        option.setAttribute("data-feedback", "✓");
+                    }
+                });
+            } else {
+                options.forEach(option => {
+                    if (option.innerText === selectedOption) {
+                        option.classList.add("incorrect");
+                        option.setAttribute("data-feedback", "✕");
+                    }
+                    if (option.innerText === correctAnswer) {
+                        option.classList.add("correct");
+                        option.setAttribute("data-feedback", "✓");
+                    }
+                });
+            }
+
+            document.getElementById("next-btn").style.display = "block";
+            clearInterval(timer);
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+
+            if (currentQuestionIndex < quizQuestions.length) {
+                showQuestion();
+            } else {
+                showScore();
+            }
+        }
+
+        function showScore() {
+            const percentage = (score / quizQuestions.length) * 100;
+            document.getElementById("quiz-container").innerHTML = `
+                <h2>Congratulations! 🎉</h2>
+                <h3>Your Score: ${score} / ${quizQuestions.length} (${percentage.toFixed(2)}%)</h3>
+                <button onclick="restartQuiz()">Try Again</button>
+            `;
+        }
+
+        function restartQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            showQuestion();
+        }
+
+        function updateProgressBar() {
+            const progressFill = document.getElementById("progress-fill");
+            const fillPercentage = ((currentQuestionIndex + 1) / quizQuestions.length) * 100;
+            progressFill.style.width = `${fillPercentage}%`;
+        }
+
+        function resetTimer() {
+            clearInterval(timer);
+            timeLeft = 15;
+            document.getElementById("time-left").textContent = timeLeft;
+            timer = setInterval(() => {
+                timeLeft--;
+                document.getElementById("time-left").textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    selectOption(""); 
+                }
+            }, 1000);
+        }
+
+        showQuestion(); 
+    </script>
+</body>
+</html>
